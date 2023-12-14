@@ -74,10 +74,14 @@ class Distributori(dict):
                 get_distance((coord[1], coord[0]), (i["Latitudine"], i["Longitudine"]))
                 <= radius
             ):
-                i["Latitudine"] = float(i["Latitudine"])
-                i["Longitudine"] = float(i["Longitudine"])
-                i["Nome"] = i.pop("Nome Impianto")
-                i["Brand"] = i.pop("Gestore")
+                print(f"IMPIANTO: {i}", flush=True)
+                try:
+                    i["Latitudine"] = float(i["Latitudine"])
+                    i["Longitudine"] = float(i["Longitudine"])
+                    i["Nome"] = i.pop("Nome Impianto")
+                    i["Brand"] = i.pop("Gestore")
+                except Exception:
+                    ...
                 res.append(i)
             if len(res) == num:
                 break
