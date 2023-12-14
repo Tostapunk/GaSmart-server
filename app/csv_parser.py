@@ -103,11 +103,11 @@ class Distributori(dict):
 
         for i in impianti:
             imp_coords.append([float(i["Longitudine"]), float(i["Latitudine"])])
-            imp_prices = []
+            imp_prices = {}
             comunication_datetime = ""
             for p in self.prezzi:
                 if p["idImpianto"] == i["idImpianto"] and int(p["isSelf"]) == 1:
-                    imp_prices.append({p["descCarburante"]: float(p["prezzo"])})
+                    imp_prices[p["descCarburante"]] = float(p["prezzo"])
                     if comunication_datetime == "":
                         comunication_datetime = p["dtComu"]
             i["prezzi"] = imp_prices

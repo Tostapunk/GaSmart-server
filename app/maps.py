@@ -3,7 +3,7 @@ import openrouteservice
 
 class DistanceMatrix(dict):
     def __init__(self):
-        self.key = ""
+        self.key = "5b3ce3597851110001cf62487b344e09b8b546b1b673c6cde61c7c9c"
         self.client = openrouteservice.Client(self.key)
 
     def get(self, usr_coord, distr_coord):
