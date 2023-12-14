@@ -127,7 +127,7 @@ class Distributori(dict):
 def csv_to_dict(data_type: DataType):
     res = []
 
-    with open(data_type.value["file"], newline="") as csvfile:
+    with open(data_type.value["file"], newline="", encoding="utf8") as csvfile:
         reader = csv.DictReader(
             csvfile,
             fieldnames=data_type.value["csv_fields"],
