@@ -11,6 +11,7 @@ def index():
 
 
 # @app.route("/get/<coord>/<int:radius>/<int:num_res>/<order_type>/")
+@app.route("/get/<coord>/<int:radius>/<int:num_res>/<float:kml>/<carburante>")
 @app.route("/get/<coord>/<int:radius>/<int:num_res>/")
 @app.route("/get/")
 def get(
@@ -18,11 +19,15 @@ def get(
     radius=8.5,
     num_res=5,
     order_type="min_distance",
+    kml=None,
+    carburante=None,
+    # kml=26.672,
+    # carburante="Benzina",
 ):
     coord = coord.split(",")
     coord = [float(coord[1]), float(coord[0])]
     return (
-        distributori.get(coord, num_res, radius),
+        distributori.get(coord, num_res, radius, kml, carburante),
         200,
     )
 

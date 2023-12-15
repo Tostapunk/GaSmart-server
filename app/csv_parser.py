@@ -93,10 +93,15 @@ class Distributori(dict):
     qua si potrà in caso aggiungere la questione percorso sostenibile
     e robe simili.
     Questa è la funzione che viene chiamata dalla chiamata all'API,
-    e poi va a sua volta a chiamare __get_impianti() per fare una scrematura
+    e poi va a sua volta a chiamare __get_impianti() per fare una scrematura.
+    Momentaneamente restituiamo:
+    - il percorso più veloce se kml=None
+    - il percorso con più conveniente altrimenti, il costo viene calcolato come segue:
+        consumo = distanza * kml
+        spesa = consumo * prezzo_carburante
     """
 
-    def get(self, coord, num, radius):
+    def get(self, coord, num, radius, kml, carburante):
         self.__update()
         impianti = self.__get_impianti(coord, num, radius)
         imp_coords = []
@@ -113,17 +118,23 @@ class Distributori(dict):
             i["prezzi"] = imp_prices
             i["TempoComunicazione"] = comunication_datetime
 
-        mat = self.dist_matrix.get(coord, imp_coords)
-        mat = mat[1:]
-        print(f"MATRIX: {mat}", flush=True)
+        if kml is not None:
+            mat = self.dist_matrix.get_distances(coord, imp_coords)[1:]
+        else:
+            mat = self.dist_matrix.get_durations(coord, imp_coords)[1:]
         idx = 0
         for i in impianti:
-            i["distanza_t"] = mat[idx]
+            if kml is not None:
+                prezzo = i["prezzi"][carburante]
+                i["spesa_consumi"] = (
+                    mat[idx] * kml
+                ) * prezzo  # è da moltiplicare anche il costo del carburante
+            else:
+                i["distanza_t"] = mat[idx]
             idx += 1
 
-        impianti = sorted(
-            impianti, key=lambda k: k["distanza_t"]
-        )  # sort per tempo distanza crescente
+        sorting_key = "spesa_consumi" if kml is not None else "distanza_t"
+        impianti = sorted(impianti, key=lambda k: k[sorting_key])
 
         return impianti  # Tanto Flask fa in automatico la conversione in JSON
 
