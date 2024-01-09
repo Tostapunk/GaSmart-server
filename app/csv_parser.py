@@ -2,7 +2,7 @@ import csv
 import urllib.request
 from enum import Enum
 from math import sqrt, inf, sin, cos, atan2, radians
-from maps import DistanceMatrix
+from maps import OpenDistanceMatrix
 from utils import get_time
 
 
@@ -35,7 +35,7 @@ class Distributori(dict):
         self.last_update = {"date": None, "hour": None}
         self.impianti = []
         self.prezzi = []
-        self.dist_matrix = DistanceMatrix()
+        self.dist_matrix = OpenDistanceMatrix()  # TEMP:
         self.update()
 
     # Controlla se i file csv sono vecchi
