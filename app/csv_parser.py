@@ -101,7 +101,7 @@ class Distributori(dict):
         spesa = consumo * prezzo_carburante
     """
 
-    def get(self, coord, num, radius, kml, carburante):
+    def get(self, coord, radius, carburante, num, kml, sorting_key):
         self.__update()
         impianti = self.__get_impianti(coord, num, radius)
         res = []  # impianti che rispettano le nostre condizioni
@@ -121,22 +121,31 @@ class Distributori(dict):
                 i["TempoComunicazione"] = comunication_datetime
                 res.append(i)
 
-        if kml is not None:
+        # spesa_consumi: kml, distanze
+        # sostenibile: durata
+        # distanza: distanze
+
+        if (
+            sorting_key == "spesa_consumi" and kml is not None
+        ) or sorting_key == "distanza":
             mat = self.dist_matrix.get_distances(coord, res_coords)[1:]
-        else:
+        elif sorting_key == "sostenibile":
             mat = self.dist_matrix.get_durations(coord, res_coords)[1:]
+        else:
+            return "Bad format", 400
+
         idx = 0
         for i in res:
-            if kml is not None:
+            if sorting_key == "spesa_consumi":
                 prezzo = i["prezzi"][carburante]
-                i["spesa_consumi"] = (
+                i[sorting_key] = (
                     mat[idx] * kml
                 ) * prezzo  # è da moltiplicare anche il costo del carburante
             else:
-                i["distanza_t"] = mat[idx]
+                i[sorting_key] = mat[idx]
+
             idx += 1
 
-        sorting_key = "spesa_consumi" if kml is not None else "distanza_t"
         res = sorted(res, key=lambda k: k[sorting_key])
 
         return res  # Tanto Flask fa in automatico la conversione in JSON
