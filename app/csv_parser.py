@@ -104,10 +104,10 @@ class Distributori(dict):
     def get(self, coord, num, radius, kml, carburante):
         self.__update()
         impianti = self.__get_impianti(coord, num, radius)
-        imp_coords = []
+        res = []  # impianti che rispettano le nostre condizioni
+        res_coords = []  # coordinare degli impianti che rispettano le nostre condizioni
 
         for i in impianti:
-            imp_coords.append([float(i["Longitudine"]), float(i["Latitudine"])])
             imp_prices = {}
             comunication_datetime = ""
             for p in self.prezzi:
@@ -115,15 +115,18 @@ class Distributori(dict):
                     imp_prices[p["descCarburante"]] = float(p["prezzo"])
                     if comunication_datetime == "":
                         comunication_datetime = p["dtComu"]
-            i["prezzi"] = imp_prices
-            i["TempoComunicazione"] = comunication_datetime
+            if carburante in imp_prices:
+                res_coords.append([float(i["Longitudine"]), float(i["Latitudine"])])
+                i["prezzi"] = imp_prices
+                i["TempoComunicazione"] = comunication_datetime
+                res.append(i)
 
         if kml is not None:
-            mat = self.dist_matrix.get_distances(coord, imp_coords)[1:]
+            mat = self.dist_matrix.get_distances(coord, res_coords)[1:]
         else:
-            mat = self.dist_matrix.get_durations(coord, imp_coords)[1:]
+            mat = self.dist_matrix.get_durations(coord, res_coords)[1:]
         idx = 0
-        for i in impianti:
+        for i in res:
             if kml is not None:
                 prezzo = i["prezzi"][carburante]
                 i["spesa_consumi"] = (
@@ -134,9 +137,9 @@ class Distributori(dict):
             idx += 1
 
         sorting_key = "spesa_consumi" if kml is not None else "distanza_t"
-        impianti = sorted(impianti, key=lambda k: k[sorting_key])
+        res = sorted(res, key=lambda k: k[sorting_key])
 
-        return impianti  # Tanto Flask fa in automatico la conversione in JSON
+        return res  # Tanto Flask fa in automatico la conversione in JSON
 
 
 def csv_to_dict(data_type: DataType):
